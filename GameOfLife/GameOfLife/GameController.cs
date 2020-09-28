@@ -14,12 +14,15 @@ namespace GameOfLife
 
         public GameController()
         {
-            numberOfRows = 15;
+            numberOfRows = 15; 
             numberOfColumns = 15;
             currentGeneration = new bool[numberOfRows, numberOfColumns];
             random = new Random();
         }
 
+        /// <summary>
+        /// Генерирует начальное состояние и запускает моделирование поколений
+        /// </summary>
         public void StartGame()
         {
             int cellsAlive = RequestNumberOfAliveCells();
@@ -31,11 +34,15 @@ namespace GameOfLife
 
             while (true)
             {
-                PopulateNextGeneration(currentGeneration);
+                PopulateNextGeneration();
                 Thread.Sleep(100);
             }
         }
 
+        /// <summary>
+        /// Считывает с клавиатуры число живых клеток для генерации начального состояния
+        /// </summary>
+        /// <returns>Возвращает количество живых клеток в начале игры</returns>
         private int RequestNumberOfAliveCells()
         {
             Console.Write($"Введите количество живых клеток в начале игры (от 0 до {currentGeneration.Length}): ");
@@ -66,11 +73,19 @@ namespace GameOfLife
             return startingNumberOfCellsAlive;
         }
 
+        /// <summary>
+        /// Проверяет введённое число на принадлежность диапазону допустимых чисел
+        /// </summary>
+        /// <param name="numberToCheck">Число, которое требуется проверить</param>
         private void CheckNumberOfCellsCorrectness(int numberToCheck)
         {
             if (numberToCheck < 0 || numberToCheck > numberOfColumns * numberOfRows) throw new NumberOutOfRangeException("Введено недопустимое число.");
         }
 
+        /// <summary>
+        /// Выводит поколение в консоль
+        /// </summary>
+        /// <param name="generationToDisplay">Поколение, которое нужно вывести</param>
         private void DisplayGeneration(bool[,] generationToDisplay)
         {
             Console.Clear();
@@ -92,6 +107,11 @@ namespace GameOfLife
             Console.WriteLine(gameField);
         }
 
+        /// <summary>
+        /// Генерирует стартовое состояние
+        /// </summary>
+        /// <param name="generation">Начальное поколение</param>
+        /// <param name="cellsAlive">Количество живых клеток в начале игры</param>
         private void GenerateStartingState(bool[,] generation, int cellsAlive)
         {
             int randomRow;
@@ -116,7 +136,10 @@ namespace GameOfLife
             DisplayGeneration(generation);
         }
 
-        private void PopulateNextGeneration(bool[,] generation)
+        /// <summary>
+        /// Заполняет следующее поколение согласно правилам игры
+        /// </summary>
+        private void PopulateNextGeneration()
         {
             bool[,] nextGeneration = new bool[numberOfRows, numberOfColumns];
 
@@ -133,6 +156,12 @@ namespace GameOfLife
             currentGeneration = nextGeneration;
         }
 
+        /// <summary>
+        /// Рассчитывает количество живых соседей для клетки
+        /// </summary>
+        /// <param name="row">Индекс ряда, в котором находится клетка</param>
+        /// <param name="column">Индекс колонки, в которой находится клетка</param>
+        /// <returns>Возвращает количество живых соседей у клетки</returns>
         private int CountNeighboursAlive(int row, int column)
         {
             int neighboursAlive = 0;
@@ -164,6 +193,13 @@ namespace GameOfLife
             return neighboursAlive;
         }
 
+        /// <summary>
+        /// Применяет правила игры для определения состояния клетки
+        /// </summary>
+        /// <param name="row">Индекс ряда, в котором находится клетка</param>
+        /// <param name="column">Индекс колонки, в которой находится клетка</param>
+        /// <param name="isCurrentCellAlive">Текущее состояние клетки</param>
+        /// <returns>Возвращает состояние клетки в следующем поколении</returns>
         private bool CalculateCellState(int row, int column, bool isCurrentCellAlive)
         {
             int neighboursAlive = CountNeighboursAlive(row, column);
