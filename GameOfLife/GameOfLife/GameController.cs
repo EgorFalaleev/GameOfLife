@@ -21,22 +21,73 @@ namespace GameOfLife
         }
 
         /// <summary>
-        /// Генерирует начальное состояние и запускает моделирование поколений
+        /// Определяет начальное состояние и запускает моделирование поколений
         /// </summary>
         public void StartGame()
         {
-            int cellsAlive = RequestNumberOfAliveCells();
+            if (AskForTestSimulation() == 1)
+            {
+                currentGeneration[5, 7] = true;
+                currentGeneration[6, 6] = true;
+                currentGeneration[6, 8] = true;
+                currentGeneration[7, 6] = true;
+                currentGeneration[7, 8] = true;
+                currentGeneration[8, 6] = true;
+                currentGeneration[8, 8] = true;
+                currentGeneration[7, 5] = true;
+                currentGeneration[7, 9] = true;
+                currentGeneration[9, 7] = true;
 
-            GenerateStartingState(currentGeneration, cellsAlive);
+                DisplayGeneration(currentGeneration);
+            }
+            else
+            {
+                int cellsAlive = RequestNumberOfAliveCells();
+
+                GenerateStartingState(currentGeneration, cellsAlive);
+            }
 
             Console.Write("Для запуска нажмите Enter.");
             Console.ReadLine();
-
-            while (true)
+            
+            
+            while (generationNumber < int.MaxValue)
             {
                 PopulateNextGeneration();
                 Thread.Sleep(100);
             }
+            
+        }
+
+        /// <summary>
+        /// Решает, использовать ли в качестве начального состояния конфигурацию из примера или сгенерировать случайную конфигурацию
+        /// </summary>
+        /// <returns>Число, на основе которого делается вывод о начальном состоянии</returns>
+        private int AskForTestSimulation()
+        {
+            Console.Write("Если хотите сгенерировать случайное поколение, введите 0. Если хотите запустить игру с тестовым поколением, введите 1.");
+
+            int decisionNumber = 0;
+
+            try
+            {
+                decisionNumber = Convert.ToInt32(Console.ReadLine());
+                CheckNumberCorrectness(decisionNumber, 0, 1);
+            }
+            catch(NumberOutOfRangeException)
+            {
+                Console.Clear();
+                Console.WriteLine("Введено недопустимое число. Пожалуйста, попробуйте ещё раз.");
+                decisionNumber = AskForTestSimulation();
+            }
+            catch(Exception)
+            {
+                Console.Clear();
+                Console.WriteLine("Произошла ошибка. Пожалуйста, попробуйте ещё раз.");
+                decisionNumber = AskForTestSimulation();
+            }
+
+            return decisionNumber;
         }
 
         /// <summary>
@@ -52,7 +103,7 @@ namespace GameOfLife
             try
             {
                 startingNumberOfCellsAlive = Convert.ToInt32(Console.ReadLine());
-                CheckNumberOfCellsCorrectness(startingNumberOfCellsAlive);
+                CheckNumberCorrectness(startingNumberOfCellsAlive, 0, numberOfColumns * numberOfRows);
             }
             catch (FormatException)
             {
@@ -77,9 +128,11 @@ namespace GameOfLife
         /// Проверяет введённое число на принадлежность диапазону допустимых чисел
         /// </summary>
         /// <param name="numberToCheck">Число, которое требуется проверить</param>
-        private void CheckNumberOfCellsCorrectness(int numberToCheck)
+        /// <param name="min">Нижняя граница</param>
+        /// <param name="max">Верхняя граница</param>
+        private void CheckNumberCorrectness(int numberToCheck, int min, int max)
         {
-            if (numberToCheck < 0 || numberToCheck > numberOfColumns * numberOfRows) throw new NumberOutOfRangeException("Введено недопустимое число.");
+            if (numberToCheck < min || numberToCheck > max) throw new NumberOutOfRangeException("Введено недопустимое число.");
         }
 
         /// <summary>
@@ -132,7 +185,7 @@ namespace GameOfLife
                 generation[randomRow, randomColumn] = true;
             }
 
-            generationNumber = 1;
+            generationNumber = 0;
             DisplayGeneration(generation);
         }
 
